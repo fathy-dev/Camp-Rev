@@ -6,8 +6,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, UserRole, AuthState, ROLE_PERMISSIONS } from '../types';
 
-// Demo users - hardcoded for frontend-only auth
-const DEMO_USERS: Array<{ email: string; password: string; user: User }> = [
+// Demo users - seeds for initial load
+const SEED_USERS: Array<{ email: string; password: string; user: User }> = [
     {
         email: 'admin@example.com',
         password: 'admin123',
@@ -29,7 +29,8 @@ const DEMO_USERS: Array<{ email: string; password: string; user: User }> = [
 const AUTH_STORAGE_KEYS = {
     USER: 'auth_user',
     TOKEN: 'auth_token',
-    TIMESTAMP: 'auth_timestamp'
+    TIMESTAMP: 'auth_timestamp',
+    USERS_DB: 'auth_users_db' // New key for storing registered users
 } as const;
 
 // Generate mock token
@@ -39,6 +40,7 @@ const generateMockToken = (): string => {
 
 interface AuthContextType extends AuthState {
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     hasPermission: (permission: keyof typeof ROLE_PERMISSIONS.admin) => boolean;
 }
@@ -55,6 +57,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated: false,
         isLoading: true
     });
+
+    // Initialize users DB in localStorage if empty
+    useEffect(() => {
+        const existingDB = localStorage.getItem(AUTH_STORAGE_KEYS.USERS_DB);
+        if (!existingDB) {
+            localStorage.setItem(AUTH_STORAGE_KEYS.USERS_DB, JSON.stringify(SEED_USERS));
+        }
+    }, []);
 
     // Check for existing session on mount
     useEffect(() => {
@@ -81,12 +91,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
     }, []);
 
+    const getUsersDB = useCallback(() => {
+        const dbStr = localStorage.getItem(AUTH_STORAGE_KEYS.USERS_DB);
+        return dbStr ? JSON.parse(dbStr) : SEED_USERS;
+    }, []);
+
     const login = useCallback(async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-        const matchedUser = DEMO_USERS.find(
-            u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+        const usersDB = getUsersDB();
+        const matchedUser = usersDB.find(
+            (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
         );
 
         if (!matchedUser) {
@@ -106,7 +122,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
 
         return { success: true };
-    }, []);
+    }, [getUsersDB]);
+
+    const register = useCallback(async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const usersDB = getUsersDB();
+        const existingUser = usersDB.find((u: any) => u.email.toLowerCase() === email.toLowerCase());
+
+        if (existingUser) {
+            return { success: false, error: 'Email already registered' };
+        }
+
+        const newUser = {
+            email,
+            password,
+            user: {
+                id: `u-${Date.now()}`,
+                email,
+                name,
+                role: 'editor' as UserRole // Default role for new users
+            }
+        };
+
+        const updatedDB = [...usersDB, newUser];
+        localStorage.setItem(AUTH_STORAGE_KEYS.USERS_DB, JSON.stringify(updatedDB));
+
+        // Auto-login after registration
+        return login(email, password);
+    }, [getUsersDB, login]);
 
     const logout = useCallback(() => {
         localStorage.removeItem(AUTH_STORAGE_KEYS.USER);
@@ -126,7 +171,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, [authState.user]);
 
     return (
-        <AuthContext.Provider value={{ ...authState, login, logout, hasPermission }}>
+        <AuthContext.Provider value={{ ...authState, login, register, logout, hasPermission }}>
             {children}
         </AuthContext.Provider>
     );

@@ -5,30 +5,52 @@
 
 import React, { useState, FormEvent } from 'react';
 import { useAuth } from './AuthContext';
+import RegisterPage from './RegisterPage';
 
 const LoginPage: React.FC = () => {
     const { login, isAuthenticated } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
 
     // Prevent logged-in users from accessing login page
     if (isAuthenticated) {
         return null;
     }
 
+    if (isRegistering) {
+        return <RegisterPage onSwitchToLogin={() => setIsRegistering(false)} />;
+    }
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setError('');
+        setError(null);
         setIsLoading(true);
 
-        const result = await login(email, password);
-
-        if (!result.success) {
-            setError(result.error || 'Login failed');
+        try {
+            const result = await login(email, password);
+            if (!result.success) {
+                setError(result.error || 'Login failed');
+            }
+        } catch (err) {
+            setError('An unexpected error occurred');
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
+    };
+
+    const handleDemoLogin = (role: 'admin' | 'editor' | 'viewer') => {
+        const credentials = {
+            admin: { email: 'admin@example.com', pass: 'admin123' },
+            editor: { email: 'editor@example.com', pass: 'editor123' },
+            viewer: { email: 'viewer@example.com', pass: 'viewer123' }
+        };
+
+        const { email, pass } = credentials[role];
+        setEmail(email);
+        setPassword(pass);
     };
 
     return (
@@ -104,23 +126,46 @@ const LoginPage: React.FC = () => {
                             'Sign In'
                         )}
                     </button>
+
+                    <div className="mt-6 text-center">
+                        <p className="text-slate-400 font-medium text-sm">
+                            Don't have an account?{' '}
+                            <button
+                                type="button"
+                                onClick={() => setIsRegistering(true)}
+                                className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors"
+                            >
+                                Sign Up
+                            </button>
+                        </p>
+                    </div>
                 </form>
 
                 {/* Demo Accounts Info */}
                 <div className="mt-8 p-6 bg-white/5 rounded-2xl border border-white/10">
                     <h3 className="text-slate-300 text-xs font-bold uppercase tracking-wider mb-3">Demo Accounts</h3>
                     <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-3">
-                            <span className="px-2 py-1 bg-emerald-500/20 text-emerald-300 rounded-lg text-xs font-bold">Admin</span>
-                            <span className="text-slate-400">admin@example.com / admin123</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded-lg text-xs font-bold">Editor</span>
-                            <span className="text-slate-400">editor@example.com / editor123</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="px-2 py-1 bg-slate-500/20 text-slate-300 rounded-lg text-xs font-bold">Viewer</span>
-                            <span className="text-slate-400">viewer@example.com / viewer123</span>
+                        <div className="grid grid-cols-1 gap-2">
+                            {(['admin', 'editor', 'viewer'] as const).map(role => (
+                                <button
+                                    key={role}
+                                    onClick={() => handleDemoLogin(role)}
+                                    className="flex items-center justify-between p-2 hover:bg-white/5 rounded-lg transition-colors group text-left w-full"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className={`px-2 py-1 rounded-lg text-xs font-bold uppercase ${role === 'admin' ? 'bg-emerald-500/20 text-emerald-300' :
+                                                role === 'editor' ? 'bg-blue-500/20 text-blue-300' :
+                                                    'bg-slate-500/20 text-slate-300'
+                                            }`}>
+                                            {role}
+                                        </span>
+                                        <span className="text-slate-400 group-hover:text-slate-200 transition-colors">
+                                            {role}@example.com
+                                        </span>
+                                    </div>
+                                    <span className="text-xs text-slate-500">123</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
                 </div>
