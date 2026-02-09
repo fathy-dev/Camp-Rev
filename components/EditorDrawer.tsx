@@ -6,7 +6,7 @@ interface EditorDrawerProps {
   post: Post;
   onUpdate: (data: Partial<Post>) => void;
   onClose: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }
 
 const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, onDelete }) => {
@@ -41,7 +41,7 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
       <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-md" onClick={onClose} />
-      
+
       <div className="relative w-full max-w-[460px] bg-white h-full shadow-2xl flex flex-col animate-slide-in overflow-hidden border-l border-slate-100">
         <div className="p-8 border-b border-slate-100 bg-white sticky top-0 z-10 flex items-center justify-between">
           <div>
@@ -60,9 +60,8 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all ${
-                activeTab === tab ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600'
-              }`}
+              className={`flex-1 py-4 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === tab ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
             >
               {tab}
             </button>
@@ -81,7 +80,7 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
                         <img src={post.profileImage} className="w-full h-full object-cover" alt="Profile" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-300">
-                          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
                         </div>
                       )}
                       <input type="file" onChange={handleProfileImage} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
@@ -112,7 +111,7 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{plat} Caption</span>
                       </div>
-                      <textarea 
+                      <textarea
                         value={post.captions[plat]}
                         onChange={(e) => onUpdate({ captions: { ...post.captions, [plat]: e.target.value } })}
                         className="w-full h-32 bg-slate-50 border border-slate-100 rounded-[28px] p-6 text-sm text-slate-700 leading-relaxed resize-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white transition-all outline-none font-medium"
@@ -156,10 +155,10 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
                   </div>
                 ))}
                 {post.media.length === 0 && (
-                   <div className="col-span-2 py-20 border-2 border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center gap-4 text-slate-300">
-                     <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                     <p className="text-[11px] font-black uppercase tracking-widest">No Media Uploaded</p>
-                   </div>
+                  <div className="col-span-2 py-20 border-2 border-dashed border-slate-100 rounded-[40px] flex flex-col items-center justify-center gap-4 text-slate-300">
+                    <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    <p className="text-[11px] font-black uppercase tracking-widest">No Media Uploaded</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -171,32 +170,31 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
                 <h3 className="text-[11px] font-black text-indigo-500 uppercase tracking-widest">Visibility Options</h3>
                 <div className="space-y-4">
                   <label className="flex items-center gap-4 p-5 bg-white border border-slate-100 rounded-3xl hover:border-indigo-100 cursor-pointer transition-all group shadow-sm">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="w-6 h-6 rounded-lg border-slate-200 text-indigo-600 focus:ring-indigo-500 transition-all"
-                      checked={post.showOnAll} 
-                      onChange={(e) => onUpdate({ showOnAll: e.target.checked })} 
+                      checked={post.showOnAll}
+                      onChange={(e) => onUpdate({ showOnAll: e.target.checked })}
                     />
                     <div className="flex-1">
                       <span className="text-sm font-black text-slate-800 tracking-tight block">Omni-Channel Visibility</span>
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Display on all enabled platforms</span>
                     </div>
                   </label>
-                  
+
                   {!post.showOnAll && (
                     <div className="grid grid-cols-3 gap-3">
                       {(['Instagram', 'Facebook', 'LinkedIn'] as Platform[]).map(plat => (
                         <button
                           key={plat}
                           onClick={() => {
-                            const newPlats = post.platforms.includes(plat) 
+                            const newPlats = post.platforms.includes(plat)
                               ? post.platforms.filter(p => p !== plat)
                               : [...post.platforms, plat];
                             onUpdate({ platforms: newPlats });
                           }}
-                          className={`py-3.5 px-2 rounded-2xl text-[10px] font-black border transition-all uppercase tracking-widest ${
-                            post.platforms.includes(plat) ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'
-                          }`}
+                          className={`py-3.5 px-2 rounded-2xl text-[10px] font-black border transition-all uppercase tracking-widest ${post.platforms.includes(plat) ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-white border-slate-100 text-slate-400 hover:bg-slate-50'
+                            }`}
                         >
                           {plat}
                         </button>
@@ -219,7 +217,7 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={stat.icon} /></svg>
                         {stat.label}
                       </div>
-                      <input 
+                      <input
                         type="number"
                         value={post.engagement[stat.key as keyof typeof post.engagement]}
                         onChange={(e) => onUpdate({ engagement: { ...post.engagement, [stat.key]: parseInt(e.target.value) || 0 } })}
@@ -234,16 +232,17 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ post, onUpdate, onClose, on
         </div>
 
         <div className="p-8 border-t border-slate-100 bg-white flex items-center gap-4 sticky bottom-0">
-          <button 
+          <button
             onClick={onClose}
             className="flex-1 py-4 bg-slate-900 text-white rounded-[24px] font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-2xl active:scale-95"
           >
             Finished Editing
           </button>
-          <button 
+          <button
             onClick={onDelete}
-            className="p-4 bg-red-50 text-red-500 rounded-[24px] hover:bg-red-100 transition-all border border-red-100"
+            className={`p-4 bg-red-50 text-red-500 rounded-[24px] hover:bg-red-100 transition-all border border-red-100 ${!onDelete ? 'hidden' : ''}`}
             title="Delete Permanently"
+            disabled={!onDelete}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           </button>

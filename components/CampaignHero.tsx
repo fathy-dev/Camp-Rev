@@ -6,7 +6,7 @@ interface CampaignHeroProps {
   campaign: Campaign;
   updateCampaign: (campaign: Campaign) => void;
   viewMode: ViewMode;
-  onDuplicate: () => void;
+  onDuplicate?: () => void;
 }
 
 const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, viewMode, onDuplicate }) => {
@@ -25,7 +25,7 @@ const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, v
           <img src={campaign.logo} alt="Logo" className="w-28 h-28 mx-auto rounded-[32px] object-cover shadow-2xl border-4 border-white ring-1 ring-slate-100" />
         ) : (
           <div className="w-24 h-24 bg-slate-50 rounded-[32px] mx-auto flex items-center justify-center text-slate-200 border border-slate-100">
-             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
         )}
         <div className="space-y-6">
@@ -42,7 +42,7 @@ const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, v
   return (
     <section className="bg-white p-12 md:p-16 rounded-[48px] shadow-sm border border-slate-100 space-y-12 relative group overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-      
+
       <div className="flex flex-col md:flex-row items-start md:items-center gap-12 relative z-10">
         <div className="relative group/logo shrink-0">
           <div className="w-48 h-48 bg-slate-50 rounded-[40px] border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden shrink-0 hover:border-indigo-400 hover:bg-indigo-50/50 transition-all duration-500 shadow-inner">
@@ -88,9 +88,10 @@ const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, v
                 placeholder="Launch Date"
               />
             </div>
-            <button 
+            <button
               onClick={onDuplicate}
-              className="mt-auto px-6 py-3 bg-white border border-slate-100 shadow-xl shadow-slate-100 hover:bg-slate-900 hover:text-white text-slate-900 rounded-[20px] text-[11px] font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95"
+              className={`mt-auto px-6 py-3 bg-white border border-slate-100 shadow-xl shadow-slate-100 hover:bg-slate-900 hover:text-white text-slate-900 rounded-[20px] text-[11px] font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 ${!onDuplicate ? 'hidden' : ''}`}
+              disabled={!onDuplicate}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
               Clone Campaign
