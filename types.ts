@@ -33,6 +33,13 @@ export interface Campaign {
   logo: string | null;
   date: string;
   posts: Post[];
+
+  // Ownership & Sharing
+  ownerId: string;
+  createdAt: string;
+  sharedWith: string[]; // Array of emails
+  isPublic: boolean;
+  shareToken: string | null;
 }
 
 export type ViewMode = 'Portfolio' | 'Approval';

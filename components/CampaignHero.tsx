@@ -7,9 +7,20 @@ interface CampaignHeroProps {
   updateCampaign: (campaign: Campaign) => void;
   viewMode: ViewMode;
   onDuplicate?: () => void;
+  onShare?: () => void;
+  onToggleMenu?: () => void;
+  isOwner?: boolean;
 }
 
-const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, viewMode, onDuplicate }) => {
+const CampaignHero: React.FC<CampaignHeroProps> = ({
+  campaign,
+  updateCampaign,
+  viewMode,
+  onDuplicate,
+  onShare,
+  onToggleMenu,
+  isOwner
+}) => {
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -20,7 +31,16 @@ const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, v
 
   if (viewMode === 'Approval') {
     return (
-      <section className="bg-white px-8 py-20 md:px-24 md:py-32 rounded-[64px] shadow-sm border border-slate-50 text-center space-y-12 animate-fade-in">
+      <section className="bg-white px-8 py-20 md:px-24 md:py-32 rounded-[64px] shadow-sm border border-slate-50 text-center space-y-12 animate-fade-in relative overflow-hidden">
+        {/* Public/Shared Indicator */}
+        <div className="absolute top-8 right-8">
+          {campaign.isPublic ? (
+            <span className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-full text-xs font-black uppercase tracking-widest border border-emerald-100">Public View</span>
+          ) : (
+            <span className="px-4 py-2 bg-purple-50 text-purple-600 rounded-full text-xs font-black uppercase tracking-widest border border-purple-100">Shared View</span>
+          )}
+        </div>
+
         {campaign.logo ? (
           <img src={campaign.logo} alt="Logo" className="w-28 h-28 mx-auto rounded-[32px] object-cover shadow-2xl border-4 border-white ring-1 ring-slate-100" />
         ) : (
@@ -42,6 +62,38 @@ const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, v
   return (
     <section className="bg-white p-12 md:p-16 rounded-[48px] shadow-sm border border-slate-100 space-y-12 relative group overflow-hidden">
       <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+      {/* Header Actions */}
+      <div className="flex justify-between items-center mb-8 relative z-20">
+        <div className="flex items-center gap-4">
+          {onToggleMenu && (
+            <button
+              onClick={onToggleMenu}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 rounded-full text-slate-500 font-bold text-xs uppercase tracking-wider transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              Campaigns
+            </button>
+          )}
+          {isOwner ? (
+            <span className="px-3 py-1 bg-indigo-50 text-indigo-500 rounded-lg text-[10px] font-black uppercase tracking-widest border border-indigo-100">Owner</span>
+          ) : (
+            <span className="px-3 py-1 bg-purple-50 text-purple-500 rounded-lg text-[10px] font-black uppercase tracking-widest border border-purple-100">Editor</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {onShare && (
+            <button
+              onClick={onShare}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 hover:shadow-indigo-300 active:scale-95 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              Share
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center gap-12 relative z-10">
         <div className="relative group/logo shrink-0">
@@ -88,14 +140,15 @@ const CampaignHero: React.FC<CampaignHeroProps> = ({ campaign, updateCampaign, v
                 placeholder="Launch Date"
               />
             </div>
-            <button
-              onClick={onDuplicate}
-              className={`mt-auto px-6 py-3 bg-white border border-slate-100 shadow-xl shadow-slate-100 hover:bg-slate-900 hover:text-white text-slate-900 rounded-[20px] text-[11px] font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 ${!onDuplicate ? 'hidden' : ''}`}
-              disabled={!onDuplicate}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
-              Clone Campaign
-            </button>
+            {onDuplicate && (
+              <button
+                onClick={onDuplicate}
+                className="mt-auto px-6 py-3 bg-white border border-slate-100 shadow-xl shadow-slate-100 hover:bg-slate-900 hover:text-white text-slate-900 rounded-[20px] text-[11px] font-black uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                Clone Campaign
+              </button>
+            )}
           </div>
         </div>
       </div>

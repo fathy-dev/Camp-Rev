@@ -40,6 +40,7 @@ const generateMockToken = (): string => {
 
 interface AuthContextType extends AuthState {
     login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+    loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
     register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
     logout: () => void;
     hasPermission: (permission: keyof typeof ROLE_PERMISSIONS.admin) => boolean;
@@ -124,6 +125,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { success: true };
     }, [getUsersDB]);
 
+    const loginWithGoogle = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate popup delay
+
+        const googleEmail = 'google_user@gmail.com';
+        const usersDB = getUsersDB();
+        let googleUser = usersDB.find((u: any) => u.email === googleEmail);
+
+        if (!googleUser) {
+            // Create if first time
+            googleUser = {
+                email: googleEmail,
+                password: '', // OAuth doesn't use password
+                user: {
+                    id: `u-google-${Date.now()}`,
+                    email: googleEmail,
+                    name: 'Google User',
+                    role: 'editor' as UserRole
+                }
+            };
+            const updatedDB = [...usersDB, googleUser];
+            localStorage.setItem(AUTH_STORAGE_KEYS.USERS_DB, JSON.stringify(updatedDB));
+        }
+
+        // Store in localStorage
+        const token = generateMockToken();
+        localStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(googleUser.user));
+        localStorage.setItem(AUTH_STORAGE_KEYS.TOKEN, token);
+        localStorage.setItem(AUTH_STORAGE_KEYS.TIMESTAMP, Date.now().toString());
+
+        setAuthState({
+            user: googleUser.user,
+            isAuthenticated: true,
+            isLoading: false
+        });
+
+        return { success: true };
+    }, [getUsersDB]);
+
     const register = useCallback(async (name: string, email: string, password: string): Promise<{ success: boolean; error?: string }> => {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -171,7 +210,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }, [authState.user]);
 
     return (
-        <AuthContext.Provider value={{ ...authState, login, register, logout, hasPermission }}>
+        <AuthContext.Provider value={{ ...authState, login, loginWithGoogle, register, logout, hasPermission }}>
             {children}
         </AuthContext.Provider>
     );
